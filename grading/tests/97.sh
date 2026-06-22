@@ -14,7 +14,7 @@ TMPELF=$(mktemp /tmp/grade_97_XXXXXX.elf)
 trap "rm -f $TMPELF" EXIT
 
 aarch64-linux-musl-gcc -nostdlib -Wl,--build-id=none \
-    -T "$STUDENT_DIR/$AVATAR_DIR/boot/aarch64/link.ld" \
+    -T "$GRADING_DIR/simple.ld" \
     "$SRC" -o "$TMPELF" 2>/dev/null || exit 1
 
 OUTPUT=$(run_qemu_simple "$TMPELF" 5)

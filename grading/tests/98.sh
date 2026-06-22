@@ -23,7 +23,7 @@ trap "rm -f $TMPELF" EXIT
 
 aarch64-linux-musl-gcc -nostdlib -ffreestanding -Wl,--build-id=none \
     -I "$STUDENT_DIR/$AVATAR_DIR/include" \
-    -T "$STUDENT_DIR/$AVATAR_DIR/boot/aarch64/link.ld" \
+    -T "$GRADING_DIR/simple.ld" \
     "$SRC" -o "$TMPELF" 2>/dev/null || exit 1
 
 OUTPUT=$(run_qemu_simple "$TMPELF" 5)
