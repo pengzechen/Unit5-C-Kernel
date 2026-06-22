@@ -30,6 +30,7 @@ _run_qemu() {
     outfile=$(mktemp /tmp/qemu_out_XXXXXX)
     timeout "$timeout_sec" \
         qemu-system-aarch64 "$@" \
+            -display none \
             -serial file:"$outfile" \
         >/dev/null 2>&1 || true
     cat "$outfile"
