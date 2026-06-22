@@ -12,6 +12,7 @@
   script: |
     git submodule update --init --recursive
     cd avatar-next
+    git submodule update --init --recursive
     # avatar-next's .gitmodules references third_party/lwip and third_party/lwext4
     # but the gitlinks were never committed, so git submodule won't fetch them.
     # Clone them manually to unblock the build.
