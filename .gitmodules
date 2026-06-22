@@ -1,0 +1,3 @@
+[submodule "avatar-next"]
+	path = avatar-next
+	url = https://github.com/pengzechen/avatar-next.git
