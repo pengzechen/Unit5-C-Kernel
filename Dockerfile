@@ -9,8 +9,7 @@ RUN sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debi
 
 # Install build tools, QEMU emulators, and utilities in one layer
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc g++ make python3 binutils file wget xz-utils ca-certificates \
-    git \
+    gcc g++ make python3 git binutils file wget xz-utils ca-certificates \
     e2fsprogs \
     qemu-system-arm \
     qemu-system-x86 \
