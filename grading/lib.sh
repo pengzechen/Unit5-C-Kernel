@@ -22,18 +22,29 @@ NC='\033[0m'
 # 对齐 avatar-next Makefile: cortex-a76, virt+virtualization=on (EL2 启动)
 # 内核产物是 .bin (objcopy 后的 raw binary)
 
+# 内部辅助: 运行 QEMU 并通过文件捕获串口输出（避免管道缓冲丢失）
+_run_qemu() {
+    local timeout_sec="$1"
+    shift
+    local outfile
+    outfile=$(mktemp /tmp/qemu_out_XXXXXX)
+    timeout "$timeout_sec" \
+        qemu-system-aarch64 "$@" \
+            -serial file:"$outfile" \
+        >/dev/null 2>&1 || true
+    cat "$outfile"
+    rm -f "$outfile"
+}
+
 run_qemu_aarch64() {
     local kernel_bin="$1"
     local timeout_sec="${2:-$QEMU_TIMEOUT}"
 
-    timeout "$timeout_sec" \
-        qemu-system-aarch64 \
-            -M virt,virtualization=on \
-            -cpu cortex-a76 \
-            -m 2G \
-            -nographic \
-            -kernel "$kernel_bin" \
-        2>&1 || true
+    _run_qemu "$timeout_sec" \
+        -M virt,virtualization=on \
+        -cpu cortex-a76 \
+        -m 2G \
+        -kernel "$kernel_bin"
 }
 
 run_qemu_aarch64_smp() {
@@ -41,15 +52,12 @@ run_qemu_aarch64_smp() {
     local cores="${2:-4}"
     local timeout_sec="${3:-$QEMU_TIMEOUT}"
 
-    timeout "$timeout_sec" \
-        qemu-system-aarch64 \
-            -M virt,virtualization=on \
-            -cpu cortex-a76 \
-            -smp "$cores" \
-            -m 2G \
-            -nographic \
-            -kernel "$kernel_bin" \
-        2>&1 || true
+    _run_qemu "$timeout_sec" \
+        -M virt,virtualization=on \
+        -cpu cortex-a76 \
+        -smp "$cores" \
+        -m 2G \
+        -kernel "$kernel_bin"
 }
 
 run_qemu_aarch64_fs() {
@@ -58,15 +66,12 @@ run_qemu_aarch64_fs() {
     local timeout_sec="${3:-15}"
     local rootfs_addr="${4:-0x48000000}"
 
-    timeout "$timeout_sec" \
-        qemu-system-aarch64 \
-            -M virt,virtualization=on \
-            -cpu cortex-a76 \
-            -m 2G \
-            -nographic \
-            -kernel "$kernel_bin" \
-            -device loader,file="$rootfs_img",addr="$rootfs_addr",force-raw=on \
-        2>&1 || true
+    _run_qemu "$timeout_sec" \
+        -M virt,virtualization=on \
+        -cpu cortex-a76 \
+        -m 2G \
+        -kernel "$kernel_bin" \
+        -device loader,file="$rootfs_img",addr="$rootfs_addr",force-raw=on
 }
 
 # 简单模式 QEMU: 用于单文件课程 (97, 98), 不需要 EL2
@@ -74,14 +79,11 @@ run_qemu_simple() {
     local kernel_bin="$1"
     local timeout_sec="${2:-5}"
 
-    timeout "$timeout_sec" \
-        qemu-system-aarch64 \
-            -machine virt \
-            -cpu cortex-a57 \
-            -m 128M \
-            -nographic \
-            -kernel "$kernel_bin" \
-        2>&1 || true
+    _run_qemu "$timeout_sec" \
+        -machine virt \
+        -cpu cortex-a57 \
+        -m 128M \
+        -kernel "$kernel_bin"
 }
 
 # --- 输出验证 ---
