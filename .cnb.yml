@@ -17,7 +17,7 @@
     # but the gitlinks were never committed, so git submodule won't fetch them.
     # Clone them manually to unblock the build.
     if [ ! -d third_party/lwip/.git ]; then
-      git clone --depth 1 -b STABLE-2_1_x https://git.savannah.nongnu.org/git/lwip.git third_party/lwip
+      git clone --depth 1 -b STABLE-2_1_x https://github.com/lwip-tcpip/lwip.git third_party/lwip
     fi
     if [ ! -d third_party/lwext4/.git ]; then
       git clone --depth 1 https://github.com/gkostka/lwext4.git third_party/lwext4
