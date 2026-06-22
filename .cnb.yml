@@ -12,10 +12,17 @@
   script: |
     git submodule update --init --recursive
     cd avatar-next
-    git submodule sync
-    git submodule update --init --recursive --force
-    ls third_party/lwip/src/include/lwip/init.h && echo "✅ lwip OK" || echo "⚠️ lwip missing"
-    ls third_party/lwext4/include/ext4.h && echo "✅ lwext4 OK" || echo "⚠️ lwext4 missing"
+    # avatar-next's .gitmodules references third_party/lwip and third_party/lwext4
+    # but the gitlinks were never committed, so git submodule won't fetch them.
+    # Clone them manually to unblock the build.
+    if [ ! -d third_party/lwip/.git ]; then
+      git clone --depth 1 https://git.savannah.nongnu.org/git/lwip.git third_party/lwip
+    fi
+    if [ ! -d third_party/lwext4/.git ]; then
+      git clone --depth 1 https://github.com/gkostka/lwext4.git third_party/lwext4
+    fi
+    echo "✅ lwip: $(ls third_party/lwip/src/include/lwip/init.h 2>/dev/null || echo MISSING)"
+    echo "✅ lwext4: $(ls third_party/lwext4/include/ext4.h 2>/dev/null || echo MISSING)"
 
 # ── Push to main: build and test avatar-next ───────────────────────────────────
 main:
