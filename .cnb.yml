@@ -6,16 +6,24 @@
     dockerfile: Dockerfile
     by: [Dockerfile]
 
+# ── Common submodule init stage ───────────────────────────────────────────────
+.init-submodule: &init-submodule
+  name: init-submodule
+  script: |
+    git submodule update --init --recursive
+    cd avatar-next
+    git submodule sync
+    git submodule update --init --recursive --force
+    ls third_party/lwip/src/include/lwip/init.h && echo "✅ lwip OK" || echo "⚠️ lwip missing"
+    ls third_party/lwext4/include/ext4.h && echo "✅ lwext4 OK" || echo "⚠️ lwext4 missing"
+
 # ── Push to main: build and test avatar-next ───────────────────────────────────
 main:
   push:
     - name: build-and-test
       docker: *docker-config
       stages:
-        - name: init-submodule
-          script: |
-            git submodule update --init --recursive
-            cd avatar-next && git submodule update --init --recursive
+        - *init-submodule
         - name: build-aarch64
           script: cd avatar-next && make ARCH=aarch64 kernel
         - name: run-aarch64-qemu
@@ -35,10 +43,7 @@ main:
     - name: pr-build-check
       docker: *docker-config
       stages:
-        - name: init-submodule
-          script: |
-            git submodule update --init --recursive
-            cd avatar-next && git submodule update --init --recursive
+        - *init-submodule
         - name: build-aarch64
           script: cd avatar-next && make ARCH=aarch64 kernel
 
@@ -50,9 +55,6 @@ $:
       services:
         - vscode
       stages:
-        - name: init-submodule
-          script: |
-            git submodule update --init --recursive
-            cd avatar-next && git submodule update --init --recursive
+        - *init-submodule
         - name: vscode-go
           type: vscode:go
