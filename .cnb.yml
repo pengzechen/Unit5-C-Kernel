@@ -13,7 +13,9 @@ main:
       docker: *docker-config
       stages:
         - name: init-submodule
-          script: git submodule update --init --recursive
+          script: |
+            git submodule update --init --recursive
+            cd avatar-next && git submodule update --init --recursive
         - name: build-aarch64
           script: cd avatar-next && make ARCH=aarch64 kernel
         - name: run-aarch64-qemu
@@ -34,7 +36,9 @@ main:
       docker: *docker-config
       stages:
         - name: init-submodule
-          script: git submodule update --init --recursive
+          script: |
+            git submodule update --init --recursive
+            cd avatar-next && git submodule update --init --recursive
         - name: build-aarch64
           script: cd avatar-next && make ARCH=aarch64 kernel
 
@@ -47,6 +51,8 @@ $:
         - vscode
       stages:
         - name: init-submodule
-          script: git submodule update --init --recursive
+          script: |
+            git submodule update --init --recursive
+            cd avatar-next && git submodule update --init --recursive
         - name: vscode-go
           type: vscode:go
