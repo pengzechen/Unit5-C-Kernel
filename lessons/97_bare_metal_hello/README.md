@@ -47,7 +47,7 @@
 
 ### 课后练习
 
-- 测试：修改程序输出 "Hello\n"（循环写入每个字符）
+- **必做（评测项）**：编写 `boot_hello.S`，让 QEMU 串口输出包含 "Hello" 的字符串
 - 扩展：在 x86_64 上用 `outb` 指令向串口 `0x3F8` 输出字符，对比 MMIO 方式
 - 挑战：不用 `.globl _start`，观察链接器报什么错误
 
@@ -59,13 +59,25 @@
 
 ---
 
-### 本课文件
+### 提交文件
 
-    boot_hello.S (自行编写)
+    lessons/97_bare_metal_hello/boot_hello.S （自行编写）
 
-### 在本仓验证
+### 手动验证
 
-    # AArch64
-    aarch64-linux-musl-gcc -nostdlib -T boot/aarch64/link.ld boot_hello.S -o /tmp/hello.elf
-    qemu-system-aarch64 -machine virt -cpu cortex-a57 -nographic -kernel /tmp/hello.elf
-    # 预期输出: A（然后 Ctrl-A X 退出 QEMU）
+所有命令在**仓库根目录**下执行：
+
+    # 编译
+    aarch64-linux-musl-gcc -nostdlib -Wl,--build-id=none \
+        -T grading/simple.ld \
+        lessons/97_bare_metal_hello/boot_hello.S \
+        -o /tmp/hello.elf
+
+    # 运行（Ctrl-A X 退出 QEMU）
+    qemu-system-aarch64 -machine virt -cpu cortex-a57 -m 128M -nographic -kernel /tmp/hello.elf
+
+    # 预期输出: Hello
+
+### 自动评测
+
+    bash grading/grade.sh -l 97
