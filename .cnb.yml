@@ -1,0 +1,68 @@
+# CNB pipeline configuration for Avatar OS Kernel learning repo
+
+# ── Common Docker configuration ────────────────────────────────────────────────
+.docker-config: &docker-config
+  build:
+    dockerfile: Dockerfile
+    by: [Dockerfile]
+
+# ── Common submodule init stage ───────────────────────────────────────────────
+.init-submodule: &init-submodule
+  name: init-submodule
+  script: |
+    git submodule update --init --recursive
+    cd avatar-next
+    git submodule update --init --recursive
+    # avatar-next's .gitmodules references third_party/lwip and third_party/lwext4
+    # but the gitlinks were never committed, so git submodule won't fetch them.
+    # Clone them manually to unblock the build.
+    if [ ! -d third_party/lwip/.git ]; then
+      git clone --depth 1 -b STABLE-2_1_x https://github.com/lwip-tcpip/lwip.git third_party/lwip
+    fi
+    if [ ! -d third_party/lwext4/.git ]; then
+      git clone --depth 1 https://github.com/gkostka/lwext4.git third_party/lwext4
+    fi
+    echo "✅ lwip: $(ls third_party/lwip/src/include/lwip/init.h 2>/dev/null || echo MISSING)"
+    echo "✅ lwext4: $(ls third_party/lwext4/include/ext4.h 2>/dev/null || echo MISSING)"
+
+# ── Push to main: build and test avatar-next ───────────────────────────────────
+main:
+  push:
+    - name: build-and-test
+      docker: *docker-config
+      stages:
+        - *init-submodule
+        - name: build-aarch64
+          script: cd avatar-next && make ARCH=aarch64 kernel
+        - name: run-aarch64-qemu
+          script: |
+            cd avatar-next
+            timeout 30 make ARCH=aarch64 run 2>&1 | tee /tmp/qemu_output.log || true
+            if [ -s /tmp/qemu_output.log ]; then
+              echo "✅ QEMU started and produced output"
+              head -20 /tmp/qemu_output.log
+            else
+              echo "⚠️ No QEMU output detected"
+            fi
+
+# ── Pull request: build check ─────────────────────────────────────────────────
+"**":
+  pull_request:
+    - name: pr-build-check
+      docker: *docker-config
+      stages:
+        - *init-submodule
+        - name: build-aarch64
+          script: cd avatar-next && make ARCH=aarch64 kernel
+
+# ── Cloud native development ───────────────────────────────────────────────────
+$:
+  vscode:
+    - name: cloud-dev
+      docker: *docker-config
+      services:
+        - vscode
+      stages:
+        - *init-submodule
+        - name: vscode-go
+          type: vscode:go
