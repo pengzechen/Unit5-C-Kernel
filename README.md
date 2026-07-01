@@ -80,6 +80,33 @@
 | RISC-V 64 | `riscv64-linux-musl-gcc` | `make ARCH=riscv64 run` |
 | x86_64 | `gcc` | `make ARCH=x86_64 run` |
 
+## 统一验证流程
+
+所有课程都使用同一套 `kernel/` 构建与运行流程。所有命令在仓库根目录执行。
+
+手动验证：
+
+```bash
+make -C kernel clean
+make -C kernel build
+make -C kernel qemu
+```
+
+自动评测单课：
+
+```bash
+bash grading/grade.sh -l 97
+```
+
+自动评测多课或全部课程：
+
+```bash
+bash grading/grade.sh -l 97,98,99
+bash grading/grade.sh
+```
+
+每课 README 中的“预期输出”描述该课程通过评测时，QEMU 串口输出需要包含的关键内容。
+
 ## 每课格式
 
 每课 README 包含：
@@ -88,4 +115,4 @@
 - **课堂讨论**：苏格拉底式问题，探究设计决策背后的"为什么"
 - **课后练习**：测试（验证行为）、扩展（添加功能）、挑战（深度探索）
 - **参考资料**：架构手册、经典教材、Avatar OS 源码文件
-- **在本仓验证**：可复制粘贴的编译和运行命令
+- **预期输出**：自动评测会匹配的关键输出

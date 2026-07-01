@@ -67,7 +67,9 @@
 
 ---
 
-### 本课文件
+### 参考源码
+
+以下为 Avatar OS 中相关实现位置，仅供参考；学生可以在 `kernel/` 目录下自行设计实现结构。
 
     driver/timer/timer.h
     driver/timer/timer.c
@@ -75,8 +77,6 @@
     driver/timer/timer_riscv64_impl.h
     driver/timer/timer_x86_64_impl.h
 
-### 在本仓验证
+### 预期输出
 
-    make ARCH=aarch64 LOG=debug
-    make ARCH=aarch64 run
-    # 观察 timer 初始化日志和 tick 输出
+    Timer 或 Tick

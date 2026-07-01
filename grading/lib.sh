@@ -7,9 +7,6 @@ GRADING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$GRADING_DIR/.." && pwd)"
 QEMU_TIMEOUT="${QEMU_TIMEOUT:-10}"
 
-# avatar-next 子目录名
-AVATAR_DIR="avatar-next"
-
 # --- 颜色 ---
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -18,73 +15,107 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-# --- QEMU 运行 ---
-# 对齐 avatar-next Makefile: cortex-a76, virt+virtualization=on (EL2 启动)
-# 内核产物是 .bin (objcopy 后的 raw binary)
+# --- 路径 ---
 
-# 内部辅助: 运行 QEMU 并通过文件捕获串口输出（避免管道缓冲丢失）
+kernel_dir() {
+    local student_dir="$1"
+    echo "$student_dir/kernel"
+}
+
+kernel_elf_path() {
+    local student_dir="$1"
+    echo "$(kernel_dir "$student_dir")/build/kernel.elf"
+}
+
+# --- 编译辅助 ---
+
+make_kernel_clean() {
+    local student_dir="$1"
+    make -C "$(kernel_dir "$student_dir")" clean >/dev/null
+}
+
+make_kernel_build() {
+    local student_dir="$1"
+    local log_file
+    log_file="$(mktemp /tmp/kernel_build_XXXXXX.log)"
+
+    if make -C "$(kernel_dir "$student_dir")" build >"$log_file" 2>&1; then
+        rm -f "$log_file"
+        return 0
+    fi
+
+    echo "===== kernel build failed =====" >&2
+    cat "$log_file" >&2
+    echo "===== end of build log =====" >&2
+    rm -f "$log_file"
+    return 1
+}
+
+build_kernel() {
+    local student_dir="$1"
+
+    make_kernel_clean "$student_dir"
+    make_kernel_build "$student_dir"
+    check_file_exists "$(kernel_elf_path "$student_dir")"
+}
+
+# --- QEMU 运行 ---
+
 _run_qemu() {
     local timeout_sec="$1"
     shift
     local outfile
-    outfile=$(mktemp /tmp/qemu_out_XXXXXX)
+    outfile="$(mktemp /tmp/qemu_out_XXXXXX)"
+
     timeout "$timeout_sec" \
         qemu-system-aarch64 "$@" \
             -display none \
             -serial file:"$outfile" \
         >/dev/null 2>&1 || true
+
     cat "$outfile"
     rm -f "$outfile"
 }
 
-run_qemu_aarch64() {
-    local kernel_bin="$1"
+run_qemu_kernel() {
+    local kernel_elf="$1"
     local timeout_sec="${2:-$QEMU_TIMEOUT}"
-
-    _run_qemu "$timeout_sec" \
-        -M virt,virtualization=on \
-        -cpu cortex-a76 \
-        -m 2G \
-        -kernel "$kernel_bin"
-}
-
-run_qemu_aarch64_smp() {
-    local kernel_bin="$1"
-    local cores="${2:-4}"
-    local timeout_sec="${3:-$QEMU_TIMEOUT}"
-
-    _run_qemu "$timeout_sec" \
-        -M virt,virtualization=on \
-        -cpu cortex-a76 \
-        -smp "$cores" \
-        -m 2G \
-        -kernel "$kernel_bin"
-}
-
-run_qemu_aarch64_fs() {
-    local kernel_bin="$1"
-    local rootfs_img="$2"
-    local timeout_sec="${3:-15}"
-    local rootfs_addr="${4:-0x48000000}"
-
-    _run_qemu "$timeout_sec" \
-        -M virt,virtualization=on \
-        -cpu cortex-a76 \
-        -m 2G \
-        -kernel "$kernel_bin" \
-        -device loader,file="$rootfs_img",addr="$rootfs_addr",force-raw=on
-}
-
-# 简单模式 QEMU: 用于单文件课程 (97, 98), 不需要 EL2
-run_qemu_simple() {
-    local kernel_bin="$1"
-    local timeout_sec="${2:-5}"
 
     _run_qemu "$timeout_sec" \
         -machine virt \
         -cpu cortex-a57 \
         -m 128M \
-        -kernel "$kernel_bin"
+        -kernel "$kernel_elf"
+}
+
+run_qemu_kernel_smp() {
+    local kernel_elf="$1"
+    local cores="${2:-4}"
+    local timeout_sec="${3:-$QEMU_TIMEOUT}"
+
+    _run_qemu "$timeout_sec" \
+        -machine virt \
+        -cpu cortex-a57 \
+        -smp "$cores" \
+        -m 128M \
+        -kernel "$kernel_elf"
+}
+
+build_and_run_kernel() {
+    local student_dir="$1"
+    local timeout_sec="${2:-$QEMU_TIMEOUT}"
+
+    build_kernel "$student_dir"
+    run_qemu_kernel "$(kernel_elf_path "$student_dir")" "$timeout_sec"
+}
+
+build_and_run_kernel_smp() {
+    local student_dir="$1"
+    local cores="${2:-4}"
+    local timeout_sec="${3:-$QEMU_TIMEOUT}"
+
+    build_kernel "$student_dir"
+    run_qemu_kernel_smp "$(kernel_elf_path "$student_dir")" "$cores" "$timeout_sec"
 }
 
 # --- 输出验证 ---
@@ -106,32 +137,8 @@ check_output_count() {
     local pattern="$2"
     local min_count="$3"
     local actual
-    actual=$(echo "$output" | grep -cE "$pattern" || true)
+    actual="$(echo "$output" | grep -cE "$pattern" || true)"
     [[ "$actual" -ge "$min_count" ]]
-}
-
-# --- 编译辅助 ---
-# 内核编译在 avatar-next 子目录下执行
-
-make_kernel_quiet() {
-    local student_dir="$1"
-    local extra_args="${2:-}"
-
-    make -C "$student_dir/$AVATAR_DIR" $extra_args >/dev/null 2>&1
-}
-
-# 获取内核 bin 路径
-kernel_bin_path() {
-    local student_dir="$1"
-    local arch="${2:-aarch64}"
-    echo "$student_dir/$AVATAR_DIR/build/kernel_${arch}.bin"
-}
-
-# 获取 rootfs 路径
-rootfs_img_path() {
-    local student_dir="$1"
-    local arch="${2:-aarch64}"
-    echo "$student_dir/$AVATAR_DIR/build/rootfs-${arch}.img"
 }
 
 # --- 文件检查 ---

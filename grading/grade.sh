@@ -47,13 +47,6 @@ else
     LESSONS=("${ALL_LESSONS[@]}")
 fi
 
-# --- 检查 avatar-next submodule ---
-if [[ ! -f "$REPO_ROOT/$AVATAR_DIR/Makefile" ]]; then
-    echo "错误: avatar-next submodule 未初始化"
-    echo "请运行: git submodule update --init --recursive"
-    exit 1
-fi
-
 # --- 运行评测 ---
 PASS=0
 FAIL=0
@@ -70,7 +63,7 @@ for lesson in "${LESSONS[@]}"; do
         continue
     fi
 
-    if bash "$test_script" "$REPO_ROOT" 2>/dev/null; then
+    if bash "$test_script" "$REPO_ROOT"; then
         log_pass "Lesson $lesson"
         PASS=$((PASS + 1))
     else

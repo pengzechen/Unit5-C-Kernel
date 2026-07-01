@@ -59,25 +59,13 @@
 
 ---
 
-### 提交文件
+### 参考源码
 
-    lessons/97_bare_metal_hello/boot_hello.S （自行编写）
+以下为 Avatar OS 中相关实现位置，仅供参考；学生可以在 `kernel/` 目录下自行设计实现结构。
 
-### 手动验证
+    driver/uart/uart_pl011.c
+    driver/uart/uart_x86.c
 
-所有命令在**仓库根目录**下执行：
+### 预期输出
 
-    # 编译
-    aarch64-linux-musl-gcc -nostdlib -Wl,--build-id=none \
-        -T grading/simple.ld \
-        lessons/97_bare_metal_hello/boot_hello.S \
-        -o /tmp/hello.elf
-
-    # 运行（Ctrl-A X 退出 QEMU）
-    qemu-system-aarch64 -machine virt -cpu cortex-a57 -m 128M -nographic -kernel /tmp/hello.elf
-
-    # 预期输出: Hello
-
-### 自动评测
-
-    bash grading/grade.sh -l 97
+    Hello

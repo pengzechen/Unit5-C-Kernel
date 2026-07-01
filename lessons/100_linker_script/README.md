@@ -73,14 +73,14 @@
 
 ---
 
-### 本课文件
+### 参考源码
+
+以下为 Avatar OS 中相关实现位置，仅供参考；学生可以在 `kernel/` 目录下自行设计实现结构。
 
     boot/aarch64/link.ld
     boot/riscv64/link.ld
     boot/x86_64/link.ld
 
-### 在本仓验证
+### 预期输出
 
-    make ARCH=aarch64
-    aarch64-linux-musl-readelf -S build/kernel.elf | head -30
-    # 观察各段的 VMA 地址
+    kernel_size

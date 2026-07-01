@@ -83,7 +83,9 @@
 
 ---
 
-### 本课文件
+### 参考源码
+
+以下为 Avatar OS 中相关实现位置，仅供参考；学生可以在 `kernel/` 目录下自行设计实现结构。
 
     kernel/loader/elf_loader.c
     kernel/loader/elf_loader.h
@@ -91,9 +93,6 @@
     kernel/loader/elf_image.h
     include/elf.h
 
-### 在本仓验证
+### 预期输出
 
-    make ARCH=aarch64 kernel
-    make ARCH=aarch64 rootfs
-    make ARCH=aarch64 run-fs
-    # busybox shell 启动 = ELF 加载器工作正常
+    busybox、BusyBox、/ #、/bin/sh 或 Welcome

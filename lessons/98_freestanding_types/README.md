@@ -64,12 +64,12 @@
 
 ---
 
-### 本课文件
+### 参考源码
+
+以下为 Avatar OS 中相关实现位置，仅供参考；学生可以在 `kernel/` 目录下自行设计实现结构。
 
     include/types.h
 
-### 在本仓验证
+### 预期输出
 
-    # 编译确认类型大小（静态断言）
-    make ARCH=aarch64
-    # 如果 STATIC_ASSERT 失败，编译报错 "size of array ... is negative"
+    串口输出中不应包含失败标记 F

@@ -75,15 +75,15 @@
 
 ---
 
-### 本课文件
+### 参考源码
+
+以下为 Avatar OS 中相关实现位置，仅供参考；学生可以在 `kernel/` 目录下自行设计实现结构。
 
     kernel/task/aarch64/switch.S
     kernel/task/riscv64/switch.S
     kernel/task/x86_64/switch.S
     kernel/task/switch.h
 
-### 在本仓验证
+### 预期输出
 
-    make ARCH=aarch64 LOG=debug
-    make ARCH=aarch64 run
-    # 创建多个任务，观察上下文切换日志
+    Switch 或 Context，并包含 cycle、ns、tick、cost 或 elapsed

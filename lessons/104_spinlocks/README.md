@@ -70,7 +70,9 @@
 
 ---
 
-### 本课文件
+### 参考源码
+
+以下为 Avatar OS 中相关实现位置，仅供参考；学生可以在 `kernel/` 目录下自行设计实现结构。
 
     include/spinlock.h
     include/aarch64/spin_lock_impl.h
@@ -78,8 +80,6 @@
     include/x86_64/spin_lock_impl.h
     docs/SPINLOCK.md
 
-### 在本仓验证
+### 预期输出
 
-    make ARCH=aarch64 LOG=debug
-    # 运行多核测试：make ARCH=aarch64 SMP=4 run
-    # 观察 spinlock_test 的输出
+    20000

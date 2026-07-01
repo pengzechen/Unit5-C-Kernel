@@ -67,7 +67,9 @@
 
 ---
 
-### 本课文件
+### 参考源码
+
+以下为 Avatar OS 中相关实现位置，仅供参考；学生可以在 `kernel/` 目录下自行设计实现结构。
 
     include/arch.h
     include/barrier.h
@@ -75,7 +77,6 @@
     include/riscv64/barrier_impl.h
     include/x86_64/barrier_impl.h
 
-### 在本仓验证
+### 预期输出
 
-    make ARCH=aarch64 && make ARCH=riscv64 && make ARCH=x86_64
-    # 三个架构都能编译通过，证明抽象层完备
+    Architecture:

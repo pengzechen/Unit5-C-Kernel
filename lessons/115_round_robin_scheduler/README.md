@@ -81,13 +81,13 @@
 
 ---
 
-### 本课文件
+### 参考源码
+
+以下为 Avatar OS 中相关实现位置，仅供参考；学生可以在 `kernel/` 目录下自行设计实现结构。
 
     kernel/task/sched.c
     kernel/task/sched.h
 
-### 在本仓验证
+### 预期输出
 
-    make ARCH=aarch64 LOG=debug
-    make ARCH=aarch64 run
-    # 观察多任务交替执行的日志
+    Task/Thread A、B、C 各至少输出 5 次

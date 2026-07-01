@@ -67,7 +67,9 @@
 
 ---
 
-### 本课文件
+### 参考源码
+
+以下为 Avatar OS 中相关实现位置，仅供参考；学生可以在 `kernel/` 目录下自行设计实现结构。
 
     include/barrier.h
     include/aarch64/barrier_impl.h
@@ -75,8 +77,6 @@
     include/x86_64/barrier_impl.h
     docs/BARRIER.md
 
-### 在本仓验证
+### 预期输出
 
-    # 查看屏障在汇编中的展开
-    make ARCH=aarch64
-    aarch64-linux-musl-objdump -d build/kernel.elf | grep -A2 "dsb"
+    dmb、dsb 或 isb

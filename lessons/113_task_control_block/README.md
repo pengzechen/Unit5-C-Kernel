@@ -73,13 +73,13 @@
 
 ---
 
-### 本课文件
+### 参考源码
+
+以下为 Avatar OS 中相关实现位置，仅供参考；学生可以在 `kernel/` 目录下自行设计实现结构。
 
     kernel/task/task.h
     kernel/task/task.c
 
-### 在本仓验证
+### 预期输出
 
-    make ARCH=aarch64 LOG=debug
-    make ARCH=aarch64 run
-    # 观察 task 创建日志
+    至少 3 行 Task、task 或 Thread 相关输出
